@@ -7,3 +7,4 @@
 [Руководство по настройке GitHub Actions](https://docs.github.com/en/actions/quickstart)
 
 [Игра "Ударь гоблина"](https://divk-neto.github.io/HW_11-3_events/)
+.
