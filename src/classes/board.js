@@ -1,30 +1,28 @@
-// board.js
 class Board {
   constructor(parentElementId, size) {
     this.parentElement = document.querySelector(parentElementId);
-    this.size = size || 4; // Размер сетки по умолчанию 4x4
+    this.size = size || 4;
     this.cells = [];
     this.createGrid();
   }
 
-  /**
-   * Метод для создания сетки игрового поля
-   */
   createGrid() {
     this.parentElement.innerHTML = "";
     for (let i = 0; i < this.size * this.size; i++) {
       const cell = document.createElement("div");
-      cell.classList.add("cell");
-      this.parentElement.appendChild(cell);
+      cell.className = "cell";
+      this.parentElement.append(cell);
       this.cells.push(cell);
     }
   }
 
-  /**
-   * Возвращает случайную ячейку из сетки
-   */
   getRandomCell() {
-    return this.cells[Math.floor(Math.random() * this.cells.length)];
+    const indices = Array.from(Array(this.cells.length).keys());
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return this.cells[indices.pop()];
   }
 }
 

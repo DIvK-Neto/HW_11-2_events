@@ -1,96 +1,101 @@
-// game.js
 import GoblinManager from "./goblinManager.js";
 import Scoreboard from "./scoreboard.js";
 
 class Game {
   constructor() {
-    this.score = 0; // Количество попаданий
-    this.misses = 0; // Количество промахов
-    this.lastResult = 0; // Храним последний результат
+    this.score = 0;
+    this.misses = 0;
+    this.lastResult = { hits: 0, misses: 0 };
     this.isGameOver = false;
-    this.isPlaying = false; // Флаг, игра запущена или нет
-    this.isPaused = false; // Флаг, игра на паузе или нет
+    this.isPlaying = false;
+    this.isPaused = false;
     this.goblinManager = new GoblinManager(this, "#game-field");
     this.scoreboard = new Scoreboard();
-    this.goblinManager.init(); // Инициализируем прослушиватели событий
-    this.scoreboard.updateScore(this.score, this.misses, this.lastResult); // Первоначальное отображение значений
+    this.scoreboard.updateScore(this.score, this.misses, this.lastResult);
   }
 
   startGame() {
-    if (this.isGameOver || this.isPlaying) return; // Игру нельзя начать повторно
-    console.log("Игра началась!");
+    if (this.isGameOver || this.isPlaying) return;
     this.isPlaying = true;
     this.isGameOver = false;
     this.goblinManager.spawnGoblin();
-    this.interval = setInterval(() => this.goblinManager.spawnGoblin(), 1500); // Появление гоблинов каждые 1.5 секунды
+    this.interval = setInterval(() => this.goblinManager.spawnGoblin(), 1000);
   }
 
   pauseGame() {
-    if (!this.isPlaying) return; // Нельзя поставить на паузу незапущенную игру
-    console.log("Игра приостановлена.");
-    clearInterval(this.interval); // Останавливаем появление гоблинов
-    this.isPlaying = false; // Пауза игры
-    this.isPaused = true; // Устанавливаем флаг паузы
-    this.goblinManager.pauseGoblin(); // Приостанавливаем таймер текущего гоблина
+    if (!this.isPlaying) return;
+    clearInterval(this.interval);
+    this.isPlaying = false;
+    this.isPaused = true;
+    this.goblinManager.pauseGoblin();
   }
 
   continueGame() {
-    if (!this.isPaused) return; // Нельзя возобновить игру, если она не на паузе
-    console.log("Возобновление игры.");
+    if (!this.isPaused) return;
     this.isPlaying = true;
-    this.isPaused = false; // Снимаем флаг паузы
-    this.goblinManager.resumeGoblin(); // Восстанавливаем таймер текущего гоблина
-    setTimeout(() => {
-      this.goblinManager.clearCurrentGoblin(); // Удаляем текущего гоблина
-      this.interval = setInterval(() => this.goblinManager.spawnGoblin(), 1500); // Возобновляем появление гоблинов
-    }, 1000); // Ждём 1 секунду, чтобы убедиться, что текущий гоблин исчез
+    this.isPaused = false;
+    this.goblinManager.resumeGoblin();
+    this.interval = setInterval(() => this.goblinManager.spawnGoblin(), 1000);
   }
 
   resetGame() {
-    if (this.isPlaying) return; // Нельзя сбросить активную игру
-    console.log("Игра сброшена.");
-    this.lastResult = { score: this.score, misses: this.misses };
+    if (this.isPlaying) return;
+    clearInterval(this.interval);
+    this.lastResult = { hits: this.score, misses: this.misses };
     this.score = 0;
     this.misses = 0;
     this.isGameOver = false;
-    this.scoreboard.updateScore(this.score, this.misses, this.lastResult); // Обновляем счёт, но последний результат остаётся
+    this.scoreboard.updateScore(this.score, this.misses, this.lastResult);
     this.isPaused = false;
     this.isPlaying = false;
-    clearInterval(this.interval); // Останавливаем появление гоблинов
-    this.goblinManager.clearCurrentGoblin(); // Чистим игровые ячейки
+    this.goblinManager.removeListeners();
+    this.goblinManager.clearCurrentGoblin();
     this.goblinManager = new GoblinManager(this, "#game-field");
-    this.goblinManager.init(); // Перезапускаем инициализацию
   }
 
   goblinClicked(cell) {
-    if (this.isGameOver || !this.isPlaying || this.isPaused) return; // Игру нельзя продолжить, если она на паузе
-    this.score += 1; // Засчитали попадание
-    this.scoreboard.updateScore(this.score, this.misses, this.lastResult); // Обновляем счёт
-    cell.classList.add("hit"); // Эффект успешного удара
-    setTimeout(() => cell.classList.remove("hit"), 500); // Эффект длится 0.5 секунды
+    if (this.isGameOver || !this.isPlaying || this.isPaused) return;
+    this.score++;
+    this.scoreboard.updateScore(this.score, this.misses, this.lastResult);
+    cell.classList.add("hit");
+    setTimeout(() => cell.classList.remove("hit"), 500);
   }
 
   missedGoblin(cell) {
-    if (this.isGameOver || !this.isPlaying || this.isPaused) return; // Игру нельзя продолжить, если она на паузе
-    this.misses += 1; // Пропуск гоблина — промах
-    this.scoreboard.updateScore(this.score, this.misses, this.lastResult); // Обновляем счёт
-    cell.classList.add("miss"); // Эффект промаха
-    setTimeout(() => cell.classList.remove("miss"), 500); // Эффект длится 0.5 секунды
+    if (this.isGameOver || !this.isPlaying || this.isPaused) return;
+    this.misses++;
+    this.scoreboard.updateScore(this.score, this.misses, this.lastResult);
+    cell.classList.add("miss");
+    setTimeout(() => cell.classList.remove("miss"), 500);
     if (this.misses >= 5) {
-      // Ограничение на пять промахов
       this.endGame();
     }
   }
 
   endGame() {
-    clearInterval(this.interval); // Останавливаем появление гоблинов
+    clearInterval(this.interval);
     this.isGameOver = true;
     this.isPlaying = false;
-    this.lastResult = this.score; // Сохраняем текущий результат как последний
-    this.scoreboard.updateScore(this.score, this.misses, this.lastResult); // Обновляем все значения
-    alert(
-      `Игра окончена!\nПопаданий: ${this.score},\nПромахов: ${this.misses}`,
-    ); // Результат игры
+    this.lastResult = { hits: this.score, misses: this.misses };
+    this.scoreboard.updateScore(this.score, this.misses, this.lastResult);
+
+    // Модальное окно вместо alert()
+    const modal = document.querySelector("#modal");
+    const message = document.querySelector("#modal-message");
+    message.textContent = `Игра окончена!\nПопаданий: ${this.score},\nПромахов: ${this.misses}`;
+    modal.classList.remove("hidden");
+    modal.classList.add("visible");
+    this.score = 0;
+    this.misses = 0;
+
+    // Закрытие модального окна
+    const closeModalButton = document.querySelector(".close-modal");
+    closeModalButton.addEventListener("click", () => {
+      modal.classList.remove("visible");
+      modal.classList.add("hidden");
+    });
+    document.querySelector("#reset-btn").style.display = "block";
+    document.querySelector("#pause-btn").style.display = "none";
   }
 }
 

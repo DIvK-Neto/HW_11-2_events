@@ -1,4 +1,3 @@
-// scoreboard.js
 class Scoreboard {
   constructor() {
     this.hitsCountElement = document.querySelector("#hits-count");
@@ -6,14 +5,14 @@ class Scoreboard {
     this.prevResultElement = document.querySelector("#prev-result");
   }
 
-  updateScore(hits, misses, prevResult = "") {
+  updateScore(hits, misses, prevResult = { hits: 0, misses: 0 }) {
     this.hitsCountElement.textContent = `Попадания: ${hits}`;
     this.missesCountElement.textContent = `Промахи: ${misses}`;
     let resultMessage = "";
-    if (prevResult) {
-      resultMessage = `Предыдущий результат: Попадания ${prevResult.score}\n Промахи ${prevResult.misses}`;
+    if (prevResult.hits !== undefined && prevResult.misses !== undefined) {
+      resultMessage = `Предыдущий результат:\nПопадания: ${prevResult.hits}, Промахи: ${prevResult.misses}`;
     } else {
-      resultMessage = "Предыдущий результат: Нет данных"; // Сообщение по умолчанию
+      resultMessage = "Предыдущий результат: Нет данных";
     }
     this.prevResultElement.textContent = resultMessage;
   }

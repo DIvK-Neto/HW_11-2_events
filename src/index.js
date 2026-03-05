@@ -1,36 +1,53 @@
-// index.js
 import "./css/style.css";
 import Game from "./classes/game.js";
+import gif from "./images/GracefulMiniatureBustard-small.gif";
 
 document.addEventListener("DOMContentLoaded", () => {
   const gameField = document.querySelector("#game-field");
-  // Создаем ячейки динамически
-  for (let i = 0; i < 16; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    gameField.appendChild(cell);
-  }
 
-  const game = new Game(); // Создаем экземпляр игры
+  const game = new Game();
 
-  // Используем делегирование событий на документе для предотвращения потери обработчиков
-  document.body.addEventListener("click", (event) => {
-    const button = event.target.closest("button");
-    if (button && button.id === "start-btn") game.startGame();
-    else if (button && button.id === "pause-btn") {
-      game.pauseGame();
-      if (!game.isPaused) return;
-      button.style.display = "none";
-      document.querySelector("#resume-btn").style.display = "block";
-    } else if (button && button.id === "resume-btn") {
-      game.continueGame();
-      if (game.isPaused) return;
-      button.style.display = "none";
-      document.querySelector("#pause-btn").style.display = "block";
-    } else if (button && button.id === "reset-btn") {
-      game.resetGame();
-      document.querySelector("#resume-btn").style.display = "none";
-      document.querySelector("#pause-btn").style.display = "block";
-    }
+  const bgGif = () => {
+    const image = document.createElement("img");
+    image.className = "gameGif";
+    image.src = gif;
+    gameField.append(image);
+  };
+  bgGif();
+
+  const startBtn = document.querySelector("#start-btn");
+  const pauseBtn = document.querySelector("#pause-btn");
+  const resumeBtn = document.querySelector("#resume-btn");
+  const resetBtn = document.querySelector("#reset-btn");
+
+  resumeBtn.style.display = "none";
+  pauseBtn.style.display = "none";
+  resetBtn.style.display = "none";
+
+  startBtn.addEventListener("click", () => {
+    document.querySelector(".gameGif").style.display = "none";
+    game.startGame();
+    startBtn.style.display = "none";
+    pauseBtn.style.display = "block";
+  });
+  pauseBtn.addEventListener("click", () => {
+    game.pauseGame();
+    resumeBtn.style.display = "block";
+    pauseBtn.style.display = "none";
+    resetBtn.style.display = "block";
+  });
+  resumeBtn.addEventListener("click", () => {
+    pauseBtn.style.display = "block";
+    resumeBtn.style.display = "none";
+    resetBtn.style.display = "none";
+    game.continueGame();
+  });
+  resetBtn.addEventListener("click", () => {
+    game.resetGame();
+    bgGif();
+    startBtn.style.display = "block";
+    resumeBtn.style.display = "none";
+    pauseBtn.style.display = "none";
+    resetBtn.style.display = "none";
   });
 });
