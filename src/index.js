@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const image = document.createElement("img");
     image.className = "gameGif";
     image.src = gif;
+    image.alt = "background animation"; // ← добавлен alt
     gameField.append(image);
   };
   bgGif();

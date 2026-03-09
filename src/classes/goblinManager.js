@@ -11,9 +11,11 @@ class GoblinManager {
     this.gameField = document.querySelector(parentElementId);
     this.timerID = null;
     this.isPaused = false;
+    this.lastCell = null; // Запоминаем последнюю ячейку с гоблином
     this.boundHandleFieldClick = this.handleFieldClick.bind(this);
     this.init();
   }
+
   handleFieldClick(event) {
     const cell = event.target.closest(".cell");
     if (cell && !cell.contains(this.currentGoblin)) {
@@ -36,13 +38,22 @@ class GoblinManager {
   }
 
   spawnGoblin() {
-    const randomCell = this.board.getRandomCell();
+    // Получаем случайную ячейку, исключая предыдущую (если есть)
+    let randomCell;
+    do {
+      randomCell = this.board.getRandomCell();
+    } while (randomCell === this.lastCell && this.board.cells.length > 1);
+
+    this.lastCell = randomCell; // обновляем последнюю ячейку
+
+    // Удаляем старых гоблинов в этой ячейке (на всякий случай)
     const existingGoblins = randomCell.querySelectorAll(".goblin");
     existingGoblins.forEach((goblin) => goblin.remove());
 
     const goblinElement = document.createElement("img");
     goblinElement.src = goblinImg;
     goblinElement.className = "goblin";
+    goblinElement.alt = "goblin"; // ← добавлен атрибут alt
     randomCell.append(goblinElement);
 
     this.timerID = setTimeout(() => {
